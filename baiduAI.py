@@ -7,22 +7,29 @@ SECRET_KEY = 'Ga1Rl8QoSkLw6k80LzcGodCCjUkgBzIl'
 
 client = AipOcr(APP_ID, API_KEY, SECRET_KEY)
 
-""" 读取图片 """
-def get_file_content(filePath):
-    with open(filePath, 'rb') as fp:
-        return fp.read()
 
+class BaiduAI:
+    def get_file_content(self, filePath):
+        with open(filePath, 'rb') as fp:
+            return fp.read()
+
+    def find(self, img_name):
+        image = self.get_file_content(img_name)
+        idCardSide = "front"
+        options = {}
+        options["detect_direction"] = "true"
+        options["detect_risk"] = "false"
+
+        response = client.idcard(image, idCardSide, options)
+        return response
 
 if __name__ == '__main__':
-    image = get_file_content('testimages/未命名.png')
-
-    """ 如果有可选参数 """
+    ai = BaiduAI()
+    image = ai.get_file_content('testimages/61ba72c09fd847e5bc836e5c759b3e03.jpg')
+    idCardSide = "front"
     options = {}
-    options["language_type"] = "CHN_ENG"
     options["detect_direction"] = "true"
-    options["detect_language"] = "true"
-    options["probability"] = "true"
+    options["detect_risk"] = "false"
 
-    """ 调用通用文字识别, 图片参数为本地图片 """
-    response = client.basicGeneral(image, options)
+    response = client.idcard(image, idCardSide, options)
     print(response)

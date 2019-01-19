@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
 from labourer.idcardLib.idcardocr import idcardocr
+from baiduAI import BaiduAI
 import cv2
 import urllib.request, json
 import os
@@ -18,7 +19,7 @@ class IDCardAI:
     logging.basicConfig()
     def __init__(self):
         self.page_index = 0
-        self.page_size = 200
+        self.page_size = 20
         self.total_count = 0
         self.all_data = []
         self.current_list = []
@@ -36,7 +37,7 @@ class IDCardAI:
         while len(self.all_data) < self.total_count:
             self.loadMore(True)
             self.autoAuthImp()
-        loggingg.warning("执行完毕")
+        logging.warning("执行完毕")
         logging.warning("{0}个识别成功{1}个识别失败".format(len(self.success_list),len(self.faild_list)))
         logging.warning(self.success_list)
         logging.warning(self.faild_list)
@@ -83,13 +84,35 @@ class IDCardAI:
                     result = self.find(file_path)
                     if self.compare(result, labourerDict):
                         logging.warning("{0}识别成功".format(labourerDict["name"]))
-                        self.success_list.append(result)
+                        self.success_list.append(labourerDict)
+                    else:
+                        if self.trybaiduAI(file_path, labourerDict):
+                            logging.warning("{0}识别成功".format(labourerDict["name"]))
+                            self.success_list.append(labourerDict)
+                        else:
+                            logging.warning("{0}识别失败".format(labourerDict["name"]))
+                            self.faild_list.append(labourerDict)
+                except Exception as e:
+                    if self.trybaiduAI(file_path, labourerDict):
+                        logging.warning("{0}识别成功".format(labourerDict["name"]))
+                        self.success_list.append(labourerDict)
                     else:
                         logging.warning("{0}识别失败".format(labourerDict["name"]))
                         self.faild_list.append(labourerDict)
-                except Exception as e:
-                    logging.warning("{0}识别失败".format(labourerDict["name"]))
-                    self.faild_list.append(labourerDict)
+
+
+
+    def trybaiduAI(self, file_path, labourerDict):
+        logging.warning("尝试使用百度AI识别")
+        ai = BaiduAI()
+        result = ai.find(file_path)
+        result = result["words_result"]
+        logging.warning(result)
+        if "姓名" in result and "name" in labourerDict or "公民身份号码" in result and "idCard" in labourerDict:
+            if result["姓名"]["words"] == labourerDict["name"] or result["公民身份号码"]["words"] == labourerDict["idCard"]:
+                return True
+        return False
+
 
     def compare(self, match_result, labourerDict):
         if "idnum" in match_result and "idCard" in labourerDict or "name" in match_result and "name" in labourerDict:

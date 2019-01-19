@@ -14,13 +14,16 @@ def idcardAutoTask():
     obj = IDCardAI()
     (success, faild) =  obj.autoTask()
     response = "自动处理成功{0}个，失败{1}个".format(len(success), len(faild))
-    return jsonify({"msg": response})
+    return jsonify({"msg": response,
+                    "status": 0,
+                    "data": {"success": success,
+                            "faild": faild}})
 
 
 @app.route('/idcard/auth', methods=['POST'])
 def auth():
     if 'file' not in request.files:
-        return jsonify({"msg": "no file"})
+        return jsonify({"msg": "no file", "status": -1})
     file = request.files['file']
     if file:
         filepath = os.path.join("uploads/"+file.filename)
@@ -29,10 +32,10 @@ def auth():
         if response:
             return jsonify(response)
         else:
-            return jsonify({"msg": "auto auth fail"})
+            return jsonify({"msg": "auto auth fail", "status": -1})
 
     else:
-        return jsonify({"msg": "no file"})
+        return jsonify({"msg": "no file", "status": -1})
 
 if __name__ == "__main__":
     enableOpenCV(True)
