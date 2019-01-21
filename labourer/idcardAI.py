@@ -1,22 +1,19 @@
 # -*- coding: utf-8 -*-
 
-from labourer.idcardLib.idcardocr import idcardocr
 from baiduAI import BaiduAI
-import cv2
+from TencentAI import TencentAI
 import urllib.request, json
 import os
 import logging
 
-def enableOpenCV(enabled):
-    cv2.ocl.setUseOpenCL(enabled)
-
 class IDCardAI:
 
-    request_url = "http://t.hjlapp.com/cgProgramApi/labourer/getPage?platform=pc&queryCount=true"
-    img_url = "http://t.hjlapp.com:9205"
-    check_status_url = "https://t.hjlapp.com/cgProgramApi/labourer/checkStatus?platform=pc"
-    # request_url = "http://www.hjlapp.com/cgProgramApi/labourer/getPage?platform=pc&queryCount=true"
-    # img_url = "http://www.hjlapp.com"
+    # request_url = "http://t.hjlapp.com/cgProgramApi/labourer/getPage?platform=pc&queryCount=true"
+    # img_url = "http://t.hjlapp.com:9205"
+    # check_status_url = "https://t.hjlapp.com/cgProgramApi/labourer/checkStatus?platform=pc"
+    request_url = "http://www.hjlapp.com/cgProgramApi/labourer/getPage?platform=pc&queryCount=true"
+    img_url = "http://www.hjlapp.com"
+    check_status_url = "https://www.hjlapp.com/cgProgramApi/labourer/checkStatus?platform=pc"
     logging.basicConfig()
     def __init__(self):
         self.page_index = 0
@@ -28,8 +25,7 @@ class IDCardAI:
         self.success_list = []
 
     def find(self, img_name):
-        idocr = idcardocr(cv2.UMat(cv2.imread(img_name)))
-        return idocr
+        return None
 
     def autoTask(self):
         self.__init__()
@@ -100,8 +96,7 @@ class IDCardAI:
                 urllib.request.urlretrieve(img_url, file_path)
                 try:
                     logging.warning("准备识别{0}".format(labourerDict["name"]))
-                    result = self.find(file_path)
-                    if self.compare(result, labourerDict):
+                    if self.compare(file_path, labourerDict):
                         logging.warning("{0}识别成功".format(labourerDict["name"]))
                         self.success_list.append(labourerDict)
                     else:
@@ -133,8 +128,13 @@ class IDCardAI:
         return False
 
 
-    def compare(self, match_result, labourerDict):
-        if "idnum" in match_result and "idCard" in labourerDict or "name" in match_result and "name" in labourerDict:
-            if match_result["idnum"] == labourerDict["idCard"] or match_result["name"] == labourerDict["name"]:
+    def compare(self, file_path, labourerDict):
+        ai = TencentAI()
+        result = ai.find(file_path)
+        if result["ret"] != 0:
+            return False
+        result = result["data"]
+        if "name" in result and "name" in labourerDict or "id" in result and "idCard" in labourerDict:
+            if result["name"] == labourerDict["name"] or result["id"] == labourerDict["idCard"]:
                 return True
         return False

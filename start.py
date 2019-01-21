@@ -39,7 +39,6 @@ def auth():
         return jsonify({"msg": "no file", "status": -1})
 
 if __name__ == "__main__":
-    enableOpenCV(True)
     if os.path.exists("uploads") == False:
         os.makedirs("uploads")
-    app.run(host="0.0.0.0", port=8383, debug=True)
+    app.run(host="0.0.0.0", port=9993, debug=True)
