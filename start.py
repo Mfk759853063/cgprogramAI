@@ -12,13 +12,14 @@ tasks = []
 @app.route('/idcard/autotask', methods=['get'])
 def idcardAutoTask():
     obj = IDCardAI()
-    (success, faild) =  obj.autoTask()
-    response = "自动处理成功{0}个，失败{1}个".format(len(success), len(faild))
+    (success, faild, real_success) =  obj.autoTask()
+    response = "自动处理结果识别成功{0}个，失败{1}个，认证成功{2}个".format(len(success), len(faild), len(real_success))
     return jsonify({"msg": response,
                     "status": 0,
-                    "data": {"success": success,
-                            "faild": faild}})
-
+                    "data": {
+                        "authed": real_success,
+                        "finded": success,
+                        "unfind": faild}})
 
 @app.route('/idcard/auth', methods=['POST'])
 def auth():

@@ -392,7 +392,7 @@ def get_result_fix_length(red, fix_length, langset, custom_config=''):
     red_org = red
     cv2.fastNlMeansDenoising(red, red, 4, 7, 35)
     rec, red = cv2.threshold(red, 127, 255, cv2.THRESH_BINARY_INV)
-    image, contours, hierarchy = cv2.findContours(red, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
+    contours, hierarchy = cv2.findContours(red, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
     # print(len(contours))
     # 描边一次可以减少噪点
     cv2.drawContours(red, contours, -1, (0, 255, 0), 1)
@@ -443,7 +443,7 @@ def get_result_vary_length(red, langset, org_img, custom_config=''):
     red_org = red
     # cv2.fastNlMeansDenoising(red, red, 4, 7, 35)
     rec, red = cv2.threshold(red, 127, 255, cv2.THRESH_BINARY_INV)
-    image, contours, hierarchy = cv2.findContours(red, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
+    contours, hierarchy = cv2.findContours(red, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
     # print(len(contours))
     # 描边一次可以减少噪点
     cv2.drawContours(red, contours, -1, (255, 255, 255), 1)

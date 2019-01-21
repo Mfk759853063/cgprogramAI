@@ -14,6 +14,7 @@ class IDCardAI:
 
     request_url = "http://t.hjlapp.com/cgProgramApi/labourer/getPage?platform=pc&queryCount=true"
     img_url = "http://t.hjlapp.com:9205"
+    check_status_url = "https://t.hjlapp.com/cgProgramApi/labourer/checkStatus?platform=pc"
     # request_url = "http://www.hjlapp.com/cgProgramApi/labourer/getPage?platform=pc&queryCount=true"
     # img_url = "http://www.hjlapp.com"
     logging.basicConfig()
@@ -37,11 +38,29 @@ class IDCardAI:
         while len(self.all_data) < self.total_count:
             self.loadMore(True)
             self.autoAuthImp()
+
+        valid_ok_list = []
+        for labourerDict in self.success_list:
+            if self.validOk(labourerDict):
+                valid_ok_list.append(labourerDict)
         logging.warning("执行完毕")
-        logging.warning("{0}个识别成功{1}个识别失败".format(len(self.success_list),len(self.faild_list)))
+        logging.warning("{0}个识别成功{1}个识别失败{2}个认证成功".format(len(self.success_list),len(self.faild_list), len(valid_ok_list)))
         logging.warning(self.success_list)
         logging.warning(self.faild_list)
-        return (self.success_list, self.faild_list)
+        return (self.success_list, self.faild_list, valid_ok_list)
+
+    def validOk(self, labourerDict):
+        condiction = {"id": labourerDict["id"], "checkStatusIdcard": 1}
+        params = json.dumps(condiction).encode('utf8')
+        req = urllib.request.Request(self.check_status_url, data=params,
+                                     headers={'content-type': 'application/json',
+                                              'Authorization': 'admin'})
+        response = urllib.request.urlopen(req)
+        responseJson = json.loads(response.read())
+        if responseJson and responseJson["status"] == "0":
+            return True
+        return False
+
 
     def loadMore(self, load_more):
         if load_more == False:
